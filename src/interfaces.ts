@@ -1,4 +1,5 @@
 import * as p from 'puppeteer';
+import * as git from 'simple-git/promise';
 
 export interface IRevisionInfo {
   revision: string;
@@ -23,4 +24,11 @@ export interface ITimelineRunnerOptions {
   connect?: boolean;
   tracingStartOptions?: p.TracingStartOptions;
   timeout?: number;
+}
+
+export interface IRepoInfo {
+  isRepo: boolean;
+  info?: git.BranchSummary;
+  status?: {['path']: string, ['index']: string, ['working_dir']: string}[];
+  diff?: string;
 }
