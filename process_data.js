@@ -10,7 +10,7 @@ module.exports['postProcess'] = (data) => {
     metadata: data.metadata,
     summary: getSummary(timelineModel, start, end),
     topDown: getTreeData(model.topDown()),
-    buttomUp: getTreeData(model.bottomUp())
+    bottomUp: getTreeData(model.bottomUp())
   }
 }
 
