@@ -5,7 +5,7 @@ The profiling data gets written to a folder `timeline` in the app path.
 
 ### Example:
 ```js
-const timeline = require('./lib/index').timeline;
+const timeline = require('node-timeline').timeline;
 
 timeline(async (runner) => {
   // load something in chromium
