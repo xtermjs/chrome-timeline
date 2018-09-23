@@ -1,0 +1,42 @@
+{
+  "name": "node-timeline",
+  "version": "0.0.1",
+  "description": "Write performance tests and get timeline profiling data from puppeteer.",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "nyc --reporter=lcov --reporter=html mocha lib/*.test.js",
+    "tsc": "tsc",
+    "watch": "tsc -w",
+    "lint": "tslint src/**/*.ts",
+    "prepublish": "npm run tsc"
+  },
+  "keywords": [
+    "timeline",
+    "profiling",
+    "chrome",
+    "chromium",
+    "puppeteer"
+  ],
+  "author": "Joerg Breitbart <j.breitbart@netzkolchose.de>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/app-root-path": "^1.2.4",
+    "@types/fs-extra": "^5.0.4",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.10.1",
+    "@types/puppeteer": "^1.6.4",
+    "@types/uuid": "^3.4.4",
+    "fs-extra": "^7.0.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.3"
+  },
+  "dependencies": {
+    "app-root-path": "^2.1.0",
+    "devtools-timeline-model": "^1.4.0",
+    "puppeteer": "^1.8.0",
+    "uuid": "^3.3.2",
+    "winston": "^3.1.0"
+  }
+}

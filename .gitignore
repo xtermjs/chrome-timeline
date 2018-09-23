@@ -1,0 +1,8 @@
+/.vscode/
+/lib/
+/timeline/
+/node_modules/
+/.nyc_output/
+/coverage/
+# dont lock for now
+/package-lock.json/
