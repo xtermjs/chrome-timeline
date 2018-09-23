@@ -5,4 +5,4 @@
 /.nyc_output/
 /coverage/
 # dont lock for now
-/package-lock.json/
+/package-lock.json
