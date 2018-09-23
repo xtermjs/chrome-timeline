@@ -1,5 +1,5 @@
 {
-  "name": "node-timeline",
+  "name": "chrome-timeline",
   "version": "0.0.1",
   "description": "Write performance tests and get timeline profiling data from puppeteer.",
   "main": "./lib/index.js",

@@ -1,11 +1,11 @@
-## node-timeline
+## chrome-timeline
 
 Write performance tests and get the timeline profiling data from puppeteer (chromium).
 The profiling data gets written to a folder `timeline` in the app path.
 
 ### Example:
 ```js
-const timeline = require('node-timeline').timeline;
+const timeline = require('chrome-timeline').timeline;
 
 timeline(async (runner) => {
   // load something in chromium
