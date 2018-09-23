@@ -36,6 +36,7 @@
     "app-root-path": "^2.1.0",
     "devtools-timeline-model": "^1.4.0",
     "puppeteer": "^1.8.0",
+    "simple-git": "^1.102.0",
     "uuid": "^3.3.2",
     "winston": "^3.1.0"
   }

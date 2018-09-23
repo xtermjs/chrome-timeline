@@ -3,9 +3,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { createLogger, format, transports, Logger } from 'winston';
 import { v1 as uuid1, v4 as uuid4 } from 'uuid';
-import { ITimelineRunnerOptions, IRevisionInfo, IBrowserFetcherStub } from './interfaces';
 const postProcess: (buffer: Buffer) => any = require('../process_data').postProcess;
 import * as appRoot from 'app-root-path';
+import * as git from 'simple-git/promise';
+import { ITimelineRunnerOptions, IRevisionInfo, IBrowserFetcherStub, IRepoInfo } from './interfaces';
 
 /** create a unique id for every process invocation */
 const UUID: string = uuid1();
@@ -232,6 +233,7 @@ export class TimelineRunner {
         try {
           const summary = postProcess(data);
           summary['trace-file'] = tracePath;
+          summary['repo'] = await this.repoInfo(true);
           await new Promise((resolve, reject) => fs.writeFile(summaryPath,
             JSON.stringify(summary, null, 2), (e) => { (e) ? reject(e) : resolve(); }));
           this.logger.info(`trace "${this._runningTrace}" summary written to ${summaryPath}`);
@@ -251,6 +253,27 @@ export class TimelineRunner {
   /** sleep helper */
   sleep(msec: number): Promise<any> {
     return new Promise(resolve => setTimeout(resolve, msec));
+  }
+
+  /**
+   * Get repo status reported for summary report (used in `.tracingStop`).
+   * Set `showDetails` to true to get uncommitted changes as well.
+   */
+  async repoInfo(showDetails: boolean = false): Promise<IRepoInfo> {
+    const data: IRepoInfo = {isRepo: false};
+    const repo = git(this.appPath);
+    if (await repo.checkIsRepo()) {
+      data.isRepo = true;
+      data['info'] = await repo.branchLocal();
+      if (showDetails) {
+        const status = await repo.status();
+        if (status.files.length) {
+          data['status'] = status.files;
+          data['diff'] = await repo.diff();
+        }
+      }
+    }
+    return data;
   }
 }
 
