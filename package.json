@@ -1,6 +1,6 @@
 {
   "name": "chrome-timeline",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Write performance tests and get timeline profiling data from puppeteer.",
   "main": "./lib/index.js",
   "scripts": {
@@ -37,7 +37,6 @@
     "devtools-timeline-model": "^1.4.0",
     "puppeteer": "^1.8.0",
     "simple-git": "^1.104.0",
-    "uuid": "^3.3.2",
     "winston": "^3.1.0"
   }
 }

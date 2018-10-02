@@ -271,7 +271,7 @@ export class TimelineRunner {
   async repoInfo(showDetails: boolean = false): Promise<IRepoInfo> {
     const data: IRepoInfo = {isRepo: false};
     const repo = git(this.appPath);
-    const isRepo = await repo.checkIsRepo().then(() => true).catch(e => false);
+    const isRepo = await repo.checkIsRepo().then((res) => (res) ? true : false).catch(e => false);
     if (isRepo) {
       data.isRepo = true;
       data['info'] = await repo.branchLocal();
