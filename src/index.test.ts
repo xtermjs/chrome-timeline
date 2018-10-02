@@ -33,7 +33,7 @@ describe('timeline', function(): void {
       await oneShotServer();
       await runner.page.goto('http://127.0.0.1:8888/test/abc');
       assert(runner.page.url() === 'http://127.0.0.1:8888/test/abc', 'url mismatch');
-    }).then(done, done);
+    }).then(() => done(), (err) => done(err));
   });
 
   it('place & resolve remote task', function(done: Mocha.Done): void {
@@ -42,7 +42,7 @@ describe('timeline', function(): void {
       await runner.remote((resolve) => {
         resolve();
       });
-    }).then(done, done);
+    }).then(() => done(), (err) => done(err));
   });
 
   it('timeline should not hang on error', function(done: Mocha.Done): void {
@@ -86,7 +86,7 @@ describe('timeline', function(): void {
         await runner.remote((resolve) => setTimeout(() => resolve(), 1000));
         const trace = await runner.tracingStop();
         assert(trace.length > 1000, 'error retrieving trace');
-      }).then(done, done);
+      }).then(() => done(), (err) => done(err));
     });
 
     it('should write a trace file', function(done: Mocha.Done): void {
@@ -98,7 +98,7 @@ describe('timeline', function(): void {
         const trace = await runner.tracingStop();
         assert(trace.length > 1000, 'error retrieving trace');
         assert(fs.existsSync(filename), 'trace file not written');
-      }).then(done, done);
+      }).then(() => done(), (err) => done(err));
     });
 
     it('starting trace twice should not be allowed', function(done: Mocha.Done): void {
@@ -110,6 +110,24 @@ describe('timeline', function(): void {
           err => { assert(err instanceof Error); done(); }
         );
       });
+    });
+
+    it('timeline should return summaries', function(done: Mocha.Done): void {
+      this.timeout(10000);
+      timeline(async (runner) => {
+        await runner.tracingStart('trace1');
+        await runner.remote((resolve) => setTimeout(() => resolve(), 100));
+        await runner.tracingStop();
+        await runner.tracingStart('trace2');
+        await runner.remote((resolve) => setTimeout(() => resolve(), 100));
+        await runner.tracingStop();
+      }).then(
+        (summaries) => {
+          assert(typeof summaries['trace1'] === 'object');
+          assert(typeof summaries['trace2'] === 'object');
+          done();
+        },
+        (err) => done(err));
     });
   });
 });

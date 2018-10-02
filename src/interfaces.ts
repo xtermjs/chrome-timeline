@@ -32,3 +32,20 @@ export interface IRepoInfo {
   status?: {['path']: string, ['index']: string, ['working_dir']: string}[];
   diff?: string;
 }
+
+export interface IEvent {
+  id: number;
+  parentId: number;
+  selfTime: number;
+  totalTime: number;
+}
+
+export interface ISummary {
+  metadata: {[key: string]: any};
+  summary: {[key: string]: number};
+  topDown: IEvent[];
+  bottomUp: IEvent[];
+  traceFile: string;
+  traceName: string;
+  repo: IRepoInfo;
+}
