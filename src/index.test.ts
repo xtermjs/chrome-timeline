@@ -82,7 +82,7 @@ describe('timeline', function(): void {
     it('should record something', function(done: Mocha.Done): void {
       this.timeout(10000);
       timeline(async (runner) => {
-        await runner.tracingStart('test-trace');
+        await runner.tracingStart('test-trace1');
         await runner.remote((resolve) => setTimeout(() => resolve(), 1000));
         const trace = await runner.tracingStop();
         assert(trace.length > 1000, 'error retrieving trace');
@@ -92,7 +92,7 @@ describe('timeline', function(): void {
     it('should write a trace file', function(done: Mocha.Done): void {
       this.timeout(10000);
       timeline(async (runner) => {
-        await runner.tracingStart('test-trace');
+        await runner.tracingStart('test-trace2');
         const filename = path.join(runner.dataPath, `${runner.id}__${(runner as any)._runningTraceId}.trace`);
         await runner.remote((resolve) => setTimeout(() => resolve(), 1000));
         const trace = await runner.tracingStop();

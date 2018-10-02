@@ -7,14 +7,16 @@ import * as p from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 import { createLogger, format, transports, Logger } from 'winston';
-import { v1 as uuid1, v4 as uuid4 } from 'uuid';
 const postProcess: (buffer: Buffer) => any = require('../process_data').postProcess;
 import * as appRoot from 'app-root-path';
 import * as git from 'simple-git/promise';
 import { ITimelineRunnerOptions, IRevisionInfo, IBrowserFetcherStub, IRepoInfo } from './interfaces';
 
 /** create a unique id for every process invocation */
-const UUID: string = uuid1();
+const EPOCH: number = (new Date).getTime();
+
+/** create runner id within this process */
+let runnerId: number = 0;
 
 /** default options for TimelineRunner, can be changed as first argument of timeline */
 export const DEFAULT_OPTIONS: ITimelineRunnerOptions = {
@@ -63,14 +65,14 @@ export const DEFAULT_OPTIONS: ITimelineRunnerOptions = {
 export class TimelineRunner {
   public options: ITimelineRunnerOptions;
   public appPath: string = path.join(appRoot.path, 'timeline');
-  public dataPath: string = path.join(this.appPath, UUID);
-  public id: string;
+  public dataPath: string = path.join(this.appPath, EPOCH.toString());
+  public id: number;
   public logger: Logger | null;
   public browser: p.Browser | null;
   public page: p.Page | null;
   private _resolvers: {[key: string]: any} = {};
   private _runningTrace: string = '';
-  private _runningTraceId: string = '';
+  private _runningTraceId: number = 0;
 
   static async installedRevisions(): Promise<{[key: string]: IRevisionInfo}> {
     const result = {};
@@ -91,7 +93,7 @@ export class TimelineRunner {
     if (!fs.existsSync(this.dataPath)) {
       fs.mkdirSync(this.dataPath);
     }
-    this.id = uuid4();
+    this.id = ++runnerId;
     this.logger = createLogger({
       level: 'info',
       format: format.combine(format.label({label: this.id}), format.timestamp(), format.json()),
@@ -188,7 +190,7 @@ export class TimelineRunner {
    * before using this method, otherwise `done` will not work.
    */
   remote(callback: (done: () => void, window: Window) => void): Promise<void> {
-    const unique = uuid4();
+    const unique = (new Date()).getTime();
     this.logger.info(`remote task ${unique}: ${callback}`);
     return new Promise(async (resolve, reject) => {
       this._resolvers[unique] = resolve;
@@ -216,7 +218,7 @@ export class TimelineRunner {
       return Promise.reject(new Error('tracing already active'));
     }
     this._runningTrace = name;
-    this._runningTraceId = uuid4();
+    this._runningTraceId = (new Date()).getTime();
     return this.page.tracing.start(options || this.options.tracingStartOptions).then(
       () => { this.logger.info(`trace "${this._runningTrace}" started`); });
   }
@@ -230,6 +232,7 @@ export class TimelineRunner {
   tracingStop(): Promise<Buffer> {
     return this.page.tracing.stop().then(async (data) => {
       this.logger.info(`trace "${this._runningTrace}" stopped`);
+      const traceName = this._runningTrace;
       const tracePath = path.join(this.dataPath, `${this.id}__${this._runningTraceId}.trace`);
       const summaryPath = path.join(this.dataPath, `${this.id}__${this._runningTraceId}.summary`);
       try {
@@ -238,6 +241,7 @@ export class TimelineRunner {
         try {
           const summary = postProcess(data);
           summary['trace-file'] = tracePath;
+          summary['trace-name'] = traceName;
           summary['repo'] = await this.repoInfo(true);
           await new Promise((resolve, reject) => fs.writeFile(summaryPath,
             JSON.stringify(summary, null, 2), (e) => { (e) ? reject(e) : resolve(); }));
@@ -249,7 +253,7 @@ export class TimelineRunner {
         this.logger.info(`trace "${this._runningTrace}" error writing to ${tracePath} - ${e}`);
       } finally {
         this._runningTrace = '';
-        this._runningTraceId = '';
+        this._runningTraceId = 0;
       }
       return data;
     });
