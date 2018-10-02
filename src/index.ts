@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2018 The xterm.js authors. All rights reserved.
+ * @license MIT
+ */
+
 import * as p from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -262,8 +267,7 @@ export class TimelineRunner {
   async repoInfo(showDetails: boolean = false): Promise<IRepoInfo> {
     const data: IRepoInfo = {isRepo: false};
     const repo = git(this.appPath);
-    const isRepo = await repo.checkIsRepo().then(() => true).catch(e => false);
-    if (isRepo) {
+    if (await repo.checkIsRepo()) {
       data.isRepo = true;
       data['info'] = await repo.branchLocal();
       if (showDetails) {
