@@ -35,6 +35,7 @@ export interface IRepoInfo {
 
 export interface IEvent {
   id: number;
+  name: string;
   parentId: number;
   selfTime: number;
   totalTime: number;
