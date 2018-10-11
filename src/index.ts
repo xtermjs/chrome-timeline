@@ -7,10 +7,10 @@ import * as p from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 import { createLogger, format, transports, Logger } from 'winston';
-const postProcess: (buffer: Buffer) => any = require('../process_data').postProcess;
+const postProcess: (buffer: Buffer) => IPostProcess = require('../process_data').postProcess;
 import * as appRoot from 'app-root-path';
 import * as git from 'simple-git/promise';
-import { ITimelineRunnerOptions, IRevisionInfo, IBrowserFetcherStub, IRepoInfo, ISummary } from './interfaces';
+import { ITimelineRunnerOptions, IRevisionInfo, IBrowserFetcherStub, IRepoInfo, ISummary, IPostProcess } from './interfaces';
 
 /** create a unique id for every process invocation */
 const EPOCH: number = (new Date).getTime();
@@ -70,7 +70,7 @@ export class TimelineRunner {
   public logger: Logger | null;
   public browser: p.Browser | null;
   public page: p.Page | null;
-  private _resolvers: {[key: string]: any} = {};
+  private _resolvers: {[key: string]: () => void} = {};
   private _runningTrace: string = '';
   private _runningTraceId: number = 0;
   public traceSummaries: {[key: string]: ISummary} = {};
@@ -156,7 +156,7 @@ export class TimelineRunner {
     }
   }
 
-  async run_(callback: (runner: TimelineRunner) => Promise<void> | void): Promise<any> {
+  async run_(callback: (runner: TimelineRunner) => Promise<void> | void): Promise<void> {
     try {
       await callback(this);
       return Promise.resolve();
@@ -170,7 +170,7 @@ export class TimelineRunner {
    * It supports an optional timeout setting. If omitted it will wait until
    * all promises are resolved or rejected.
    */
-  run(callback: (runner: TimelineRunner) => Promise<void> | void, timeout?: number): Promise<any> {
+  run(callback: (runner: TimelineRunner) => Promise<void> | void, timeout?: number): Promise<void> {
     if (timeout || this.options.timeout) {
       return new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error('callback timeout')), timeout || this.options.timeout);
@@ -245,7 +245,7 @@ export class TimelineRunner {
           summary['traceFile'] = tracePath;
           summary['traceName'] = traceName;
           summary['repo'] = await this.repoInfo(true);
-          this.traceSummaries[traceName] = summary;
+          this.traceSummaries[traceName] = summary as ISummary;
           await new Promise((resolve, reject) => fs.writeFile(summaryPath,
             JSON.stringify(summary, null, 2), (e) => { (e) ? reject(e) : resolve(); }));
           this.logger.info(`trace "${this._runningTrace}" summary written to ${summaryPath}`);
@@ -263,7 +263,7 @@ export class TimelineRunner {
   }
 
   /** sleep helper */
-  sleep(msec: number): Promise<any> {
+  sleep(msec: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, msec));
   }
 

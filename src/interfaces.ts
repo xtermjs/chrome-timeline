@@ -41,11 +41,14 @@ export interface IEvent {
   totalTime: number;
 }
 
-export interface ISummary {
+export interface IPostProcess {
   metadata: {[key: string]: any};
   summary: {[key: string]: number};
   topDown: IEvent[];
   bottomUp: IEvent[];
+}
+
+export interface ISummary extends IPostProcess {
   traceFile: string;
   traceName: string;
   repo: IRepoInfo;
