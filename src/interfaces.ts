@@ -32,3 +32,24 @@ export interface IRepoInfo {
   status?: {['path']: string, ['index']: string, ['working_dir']: string}[];
   diff?: string;
 }
+
+export interface IEvent {
+  id: number;
+  name: string;
+  parentId: number;
+  selfTime: number;
+  totalTime: number;
+}
+
+export interface IPostProcess {
+  metadata: {[key: string]: any};
+  summary: {[key: string]: number};
+  topDown: IEvent[];
+  bottomUp: IEvent[];
+}
+
+export interface ISummary extends IPostProcess {
+  traceFile: string;
+  traceName: string;
+  repo: IRepoInfo;
+}
