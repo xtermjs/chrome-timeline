@@ -10,7 +10,7 @@ import { createLogger, format, transports, Logger } from 'winston';
 const postProcess: (buffer: Buffer) => IPostProcess = require('../process_data').postProcess;
 import * as appRoot from 'app-root-path';
 import * as git from 'simple-git/promise';
-import { ITimelineRunnerOptions, IRevisionInfo, IBrowserFetcherStub, IRepoInfo, ISummary, IPostProcess } from './interfaces';
+import { ITimelineRunnerOptions, IRevisionInfo, IBrowserFetcherStub, IRepoInfo, ISummary, IPostProcess, ITracingEndOptions } from './interfaces';
 
 /** create a unique id for every process invocation */
 const EPOCH: number = (new Date).getTime();
@@ -24,7 +24,7 @@ export const DEFAULT_OPTIONS: ITimelineRunnerOptions = {
   connect: false,
   tracingStartOptions: {
     path: null,
-    screenshots: true,
+    screenshots: false,
     categories: [
       '-*',
       'v8.execute',
@@ -41,6 +41,11 @@ export const DEFAULT_OPTIONS: ITimelineRunnerOptions = {
       'disabled-by-default-v8.cpu_profiler',
       'disabled-by-default-v8.cpu_profiler.hires'
     ]
+  },
+  tracingEndOptions: {
+    saveTrace: false,
+    createSummary: true,
+    reportUncommittedChanges: false,
   }
 };
 
@@ -215,13 +220,15 @@ export class TimelineRunner {
    * To use this on self spawned pages, set `.page` to the self spawned page.
    * It is not possible to start multiple tracings at once.
    */
-  tracingStart(name: string, options: p.TracingStartOptions = this.options.tracingStartOptions): Promise<void> {
+  tracingStart(name: string, options?: p.TracingStartOptions): Promise<void> {
+    const default_opts = this.options.tracingStartOptions || DEFAULT_OPTIONS.tracingStartOptions;
+    const opts = (options) ? Object.assign(default_opts, options) : default_opts;
     if (this._runningTrace) {
       return Promise.reject(new Error('tracing already active'));
     }
     this._runningTrace = name;
     this._runningTraceId = (new Date()).getTime();
-    return this.page.tracing.start(options || this.options.tracingStartOptions).then(
+    return this.page.tracing.start(opts).then(
       () => { this.logger.info(`trace "${this._runningTrace}" started`); });
   }
 
@@ -231,33 +238,41 @@ export class TimelineRunner {
    * with a summary in 'runnerId__traceId.summary' as json files.
    * Returns a promise that resolves to the trace data as `Buffer`.
    */
-  tracingStop(): Promise<Buffer> {
+  tracingStop(options?: ITracingEndOptions): Promise<Buffer> {
+    const default_opts = this.options.tracingEndOptions || DEFAULT_OPTIONS.tracingEndOptions;
+    const opts = (options) ? Object.assign(default_opts, options) : default_opts;
     return this.page.tracing.stop().then(async (data) => {
       this.logger.info(`trace "${this._runningTrace}" stopped`);
       const traceName = this._runningTrace;
       const tracePath = path.join(this.dataPath, `${this.id}__${this._runningTraceId}.trace`);
       const summaryPath = path.join(this.dataPath, `${this.id}__${this._runningTraceId}.summary`);
-      try {
-        await new Promise((resolve, reject) => fs.writeFile(tracePath, data, (e) => { (e) ? reject(e) : resolve(); }));
-        this.logger.info(`trace "${this._runningTrace}" written to ${tracePath}`);
-        try {
-          const summary = postProcess(data);
-          summary['traceFile'] = tracePath;
-          summary['traceName'] = traceName;
-          summary['repo'] = await this.repoInfo(true);
-          this.traceSummaries[traceName] = summary as ISummary;
-          await new Promise((resolve, reject) => fs.writeFile(summaryPath,
-            JSON.stringify(summary, null, 2), (e) => { (e) ? reject(e) : resolve(); }));
-          this.logger.info(`trace "${this._runningTrace}" summary written to ${summaryPath}`);
-        } catch (e) {
-          this.logger.info(`trace "${this._runningTrace}" error writing summary to ${summaryPath} - ${e}`);
-        }
-      } catch (e) {
-        this.logger.info(`trace "${this._runningTrace}" error writing to ${tracePath} - ${e}`);
-      } finally {
-        this._runningTrace = '';
-        this._runningTraceId = 0;
+      let summary: IPostProcess;
+      if (opts.createSummary) {
+        summary = postProcess(data);
+        summary['traceFile'] = tracePath;
+        summary['traceName'] = traceName;
+        summary['repo'] = await this.repoInfo(opts.reportUncommittedChanges);
+        this.traceSummaries[traceName] = summary as ISummary;
       }
+      if (opts.saveTrace) {
+        try {
+          await new Promise((resolve, reject) => fs.writeFile(tracePath, data, (e) => { (e) ? reject(e) : resolve(); }));
+          this.logger.info(`trace "${this._runningTrace}" written to ${tracePath}`);
+        } catch (e) {
+          this.logger.info(`trace "${this._runningTrace}" error writing to ${tracePath} - ${e}`);
+        }
+        if (opts.createSummary) {
+          try {
+            await new Promise((resolve, reject) => fs.writeFile(summaryPath,
+              JSON.stringify(summary, null, 2), (e) => { (e) ? reject(e) : resolve(); }));
+            this.logger.info(`trace "${this._runningTrace}" summary written to ${summaryPath}`);
+          } catch (e) {
+            this.logger.info(`trace "${this._runningTrace}" error writing summary to ${summaryPath} - ${e}`);
+          }
+        }
+      }
+      this._runningTrace = '';
+      this._runningTraceId = 0;
       return data;
     });
   }
