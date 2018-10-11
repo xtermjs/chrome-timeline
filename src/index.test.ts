@@ -89,13 +89,25 @@ describe('timeline', function(): void {
       }).then(() => done(), (err) => done(err));
     });
 
-    it('should write a trace file', function(done: Mocha.Done): void {
+    it('should not write a trace file by default', function(done: Mocha.Done): void {
       this.timeout(10000);
       timeline(async (runner) => {
         await runner.tracingStart('test-trace2');
         const filename = path.join(runner.dataPath, `${runner.id}__${(runner as any)._runningTraceId}.trace`);
         await runner.remote((resolve) => setTimeout(() => resolve(), 1000));
         const trace = await runner.tracingStop();
+        assert(trace.length > 1000, 'error retrieving trace');
+        assert(!fs.existsSync(filename), 'trace file written');
+      }).then(() => done(), (err) => done(err));
+    });
+
+    it('should write a trace file with saveTrace=true', function(done: Mocha.Done): void {
+      this.timeout(10000);
+      timeline(async (runner) => {
+        await runner.tracingStart('test-trace2');
+        const filename = path.join(runner.dataPath, `${runner.id}__${(runner as any)._runningTraceId}.trace`);
+        await runner.remote((resolve) => setTimeout(() => resolve(), 1000));
+        const trace = await runner.tracingStop({saveTrace: true});
         assert(trace.length > 1000, 'error retrieving trace');
         assert(fs.existsSync(filename), 'trace file not written');
       }).then(() => done(), (err) => done(err));
@@ -112,7 +124,7 @@ describe('timeline', function(): void {
       });
     });
 
-    it('timeline should return summaries', function(done: Mocha.Done): void {
+    it('timeline should return summaries by default', function(done: Mocha.Done): void {
       this.timeout(10000);
       timeline(async (runner) => {
         await runner.tracingStart('trace1');
@@ -120,11 +132,11 @@ describe('timeline', function(): void {
         await runner.tracingStop();
         await runner.tracingStart('trace2');
         await runner.remote((resolve) => setTimeout(() => resolve(), 100));
-        await runner.tracingStop();
+        await runner.tracingStop({createSummary: false});
       }).then(
         (summaries) => {
           assert(typeof summaries['trace1'] === 'object');
-          assert(typeof summaries['trace2'] === 'object');
+          assert(typeof summaries['trace2'] === 'undefined');
           done();
         },
         (err) => done(err));

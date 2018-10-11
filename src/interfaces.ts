@@ -23,6 +23,7 @@ export interface ITimelineRunnerOptions {
   connectOptions?: p.ConnectOptions;
   connect?: boolean;
   tracingStartOptions?: p.TracingStartOptions;
+  tracingEndOptions?: ITracingEndOptions;  
   timeout?: number;
 }
 
@@ -35,21 +36,37 @@ export interface IRepoInfo {
 
 export interface IEvent {
   id: number;
-  name: string;
   parentId: number;
+  name: string;
   selfTime: number;
   totalTime: number;
 }
 
 export interface IPostProcess {
+  /** useful metadata created by puppeteer (contains hardware setup and such) */
   metadata: {[key: string]: any};
+  /** profiling summary as shown in the pie chart in devtools */
   summary: {[key: string]: number};
+  /** top down tree events */
   topDown: IEvent[];
+  /** bottom up tree events */
   bottomUp: IEvent[];
 }
 
 export interface ISummary extends IPostProcess {
+  /** path to trace the summary belongs to */
   traceFile: string;
+  /** name of the trace as given to .tracingStart(name) */
   traceName: string;
+  /** additional git repo stats */
   repo: IRepoInfo;
+}
+
+export interface ITracingEndOptions {
+  /** save trace under timeline/<epoch>/runnerId_<epoch>.trace */
+  saveTrace?: boolean;
+  /** create a summary of the trace data, also saved if saveTrace=true */
+  createSummary?: boolean;
+  /** report uncommitted changes for current git branch in summary */
+  reportUncommittedChanges?: boolean;
 }
