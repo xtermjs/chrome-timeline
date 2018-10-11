@@ -65,8 +65,8 @@ export interface ISummary extends IPostProcess {
 export interface ITracingEndOptions {
   /** save trace under timeline/<epoch>/runnerId_<epoch>.trace */
   saveTrace?: boolean;
-  /** create a summary of the trace data, aslo saved if saveTrace=true */
+  /** create a summary of the trace data, also saved if saveTrace=true */
   createSummary?: boolean;
-  /** report uncommitted changes for current git branchin summary */
+  /** report uncommitted changes for current git branch in summary */
   reportUncommittedChanges?: boolean;
 }

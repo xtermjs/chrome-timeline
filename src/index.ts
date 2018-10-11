@@ -24,7 +24,7 @@ export const DEFAULT_OPTIONS: ITimelineRunnerOptions = {
   connect: false,
   tracingStartOptions: {
     path: null,
-    screenshots: false,
+    screenshots: true,
     categories: [
       '-*',
       'v8.execute',
@@ -249,7 +249,7 @@ export class TimelineRunner {
       let summary: IPostProcess;
       if (opts.createSummary) {
         summary = postProcess(data);
-        summary['traceFile'] = tracePath;
+        summary['traceFile'] = (opts.saveTrace) ? tracePath : '';
         summary['traceName'] = traceName;
         summary['repo'] = await this.repoInfo(opts.reportUncommittedChanges);
         this.traceSummaries[traceName] = summary as ISummary;
