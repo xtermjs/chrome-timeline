@@ -23,7 +23,7 @@ export interface ITimelineRunnerOptions {
   connectOptions?: p.ConnectOptions;
   connect?: boolean;
   tracingStartOptions?: p.TracingStartOptions;
-  tracingEndOptions?: ITracingEndOptions;  
+  tracingEndOptions?: ITracingEndOptions;
   timeout?: number;
 }
 
