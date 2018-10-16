@@ -221,8 +221,7 @@ export class TimelineRunner {
    * It is not possible to start multiple tracings at once.
    */
   tracingStart(name: string, options?: p.TracingStartOptions): Promise<void> {
-    const default_opts = this.options.tracingStartOptions || DEFAULT_OPTIONS.tracingStartOptions;
-    const opts = (options) ? Object.assign(default_opts, options) : default_opts;
+    const opts = Object.assign({}, DEFAULT_OPTIONS.tracingStartOptions, this.options.tracingStartOptions, options);
     if (this._runningTrace) {
       return Promise.reject(new Error('tracing already active'));
     }
@@ -239,8 +238,7 @@ export class TimelineRunner {
    * Returns a promise that resolves to the trace data as `Buffer`.
    */
   tracingStop(options?: ITracingEndOptions): Promise<Buffer> {
-    const default_opts = this.options.tracingEndOptions || DEFAULT_OPTIONS.tracingEndOptions;
-    const opts = (options) ? Object.assign(default_opts, options) : default_opts;
+    const opts = Object.assign({}, DEFAULT_OPTIONS.tracingEndOptions, this.options.tracingEndOptions, options);
     return this.page.tracing.stop().then(async (data) => {
       this.logger.info(`trace "${this._runningTrace}" stopped`);
       const traceName = this._runningTrace;

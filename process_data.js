@@ -16,24 +16,18 @@ module.exports['postProcess'] = (data) => {
 
 function getTreeData(tree) {
   const data = [];
-  const entries = {};
   let uniqueId = 0;
 
-  function walkTree(tree) {
-    const parentId = entries[tree.id] || 0;
+  function walkTree(tree, parentId) {
     tree.children.forEach((value, key) => {
-      let id;
-      if (!(id = entries[key])) {
-        id = ++uniqueId;
-        entries[key] = id;
-      }
+      const id = uniqueId++;
       data.push({id, parentId, name: value.id, selfTime: value.selfTime, totalTime: value.totalTime});
       if (value.children) {
-        walkTree(value);
+        walkTree(value, id);
       }
     });
   }
-  walkTree(tree);
+  walkTree(tree, 0);
   return data;
 }
 
