@@ -1,6 +1,6 @@
 {
   "name": "chrome-timeline",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "description": "Write performance tests and get timeline profiling data from puppeteer.",
   "main": "./lib/index.js",
   "scripts": {
@@ -20,22 +20,22 @@
   "repository": "https://github.com/xtermjs/chrome-timeline",
   "license": "MIT",
   "devDependencies": {
-    "@types/mocha": "^5.2.5",
-    "@types/node": "^10.10.1",
-    "fs-extra": "^7.0.0",
-    "mocha": "^5.2.0",
-    "nyc": "^13.0.1",
-    "tslint": "^5.11.0",
-    "typescript": "^3.0.3"
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.0.4",
+    "fs-extra": "^8.0.1",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.1",
+    "tslint": "^5.17.0",
+    "typescript": "^3.5.1"
   },
   "dependencies": {
     "@types/app-root-path": "^1.2.4",
-    "@types/fs-extra": "^5.0.4",
-    "@types/puppeteer": "^1.9.0",
-    "app-root-path": "^2.1.0",
+    "@types/fs-extra": "^7.0.0",
+    "@types/puppeteer": "^1.12.4",
+    "app-root-path": "^2.2.1",
     "devtools-timeline-model": "^1.4.0",
-    "puppeteer": "^1.8.0",
-    "simple-git": "^1.104.0",
-    "winston": "^3.1.0"
+    "puppeteer": "^1.17.0",
+    "simple-git": "^1.113.0",
+    "winston": "^3.2.1"
   }
 }

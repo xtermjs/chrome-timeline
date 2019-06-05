@@ -102,7 +102,7 @@ export class TimelineRunner {
     this.id = ++runnerId;
     this.logger = createLogger({
       level: 'info',
-      format: format.combine(format.label({label: this.id}), format.timestamp(), format.json()),
+      format: format.combine(format.label({label: this.id.toString()}), format.timestamp(), format.json()),
       transports: [
         new transports.File({filename: path.join(this.dataPath, 'activity.log')}),
         // new transports.Console
