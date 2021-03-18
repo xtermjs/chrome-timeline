@@ -3,7 +3,7 @@ import * as fse from 'fs-extra';
 
 async function waitForEnter(msg: string, release: boolean = false): Promise<any> {
   console.log(msg);
-  return new Promise(resolve => process.stdin.on('data', () => {
+  return new Promise<void>(resolve => process.stdin.on('data', () => {
     resolve();
     if (release) {
       process.stdin.end();

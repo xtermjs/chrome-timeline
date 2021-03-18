@@ -6,7 +6,7 @@ import { createServer } from 'http';
 
 
 async function oneShotServer(ip: string = '127.0.0.1', port: number = 8888): Promise<any> {
-  return new Promise(resolve => {
+  return new Promise<void>(resolve => {
     const s = createServer((req, res) => {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'text/plain');
