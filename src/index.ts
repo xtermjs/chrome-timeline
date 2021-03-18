@@ -199,7 +199,7 @@ export class TimelineRunner {
   remote(callback: (done: () => void, window: Window) => void): Promise<void> {
     const unique = (new Date()).getTime();
     this.logger.info(`remote task ${unique}: ${callback}`);
-    return new Promise(async (resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       this._resolvers[unique] = resolve;
       try {
         await this.page.evaluate(`(${callback})(() => __resolveRemote__('${unique}'), window)`);
@@ -254,14 +254,14 @@ export class TimelineRunner {
       }
       if (opts.saveTrace) {
         try {
-          await new Promise((resolve, reject) => fs.writeFile(tracePath, data, (e) => { (e) ? reject(e) : resolve(); }));
+          await new Promise<void>((resolve, reject) => fs.writeFile(tracePath, data, (e) => { (e) ? reject(e) : resolve(); }));
           this.logger.info(`trace "${this._runningTrace}" written to ${tracePath}`);
         } catch (e) {
           this.logger.info(`trace "${this._runningTrace}" error writing to ${tracePath} - ${e}`);
         }
         if (opts.createSummary) {
           try {
-            await new Promise((resolve, reject) => fs.writeFile(summaryPath,
+            await new Promise<void>((resolve, reject) => fs.writeFile(summaryPath,
               JSON.stringify(summary, null, 2), (e) => { (e) ? reject(e) : resolve(); }));
             this.logger.info(`trace "${this._runningTrace}" summary written to ${summaryPath}`);
           } catch (e) {
